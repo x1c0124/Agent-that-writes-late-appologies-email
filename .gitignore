@@ -1,0 +1,24 @@
+# OS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.venv/
+.env
+
+# Logs
+.logs/
+*.log
+
+# Node/Frontend
+node_modules/
+dist/
+build/
+
+# Editor
+.vscode/*
+!.vscode/settings.json

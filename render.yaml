@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: late-email-backend
+    env: python
+    plan: free
+    buildCommand: |
+      cd backend
+      python -m pip install --upgrade pip
+      pip install -r requirements.txt
+    startCommand: |
+      cd backend && uvicorn app:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4o-mini
+      - key: MAILERSEND_API_KEY
+        sync: false
+      - key: CORS_ORIGIN
+        value: https://late-email-frontend.onrender.com
+
+  - type: static_site
+    name: late-email-frontend
+    buildCommand: ''
+    publishPath: frontend

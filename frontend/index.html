@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Late Email Agent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+      :root { --bg: #1d1308; --panel: #2a1a0a; --text: #fff4e6; --muted: #ffcf9a; --accent: #ff8a00; --accent2: #ffd166; }
+      * { box-sizing: border-box; }
+      body { margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; background: radial-gradient(1200px 800px at 10% 10%, #3b230f, #1d1308), var(--bg); color: var(--text); }
+      .container { max-width: 1000px; margin: 0 auto; padding: 32px 20px 64px; }
+      h1 { margin: 0 0 16px; font-weight: 700; letter-spacing: -0.02em; }
+      .subtitle { color: var(--muted); margin-bottom: 24px; }
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+      .panel { background: linear-gradient(180deg, rgba(255,165,0,0.08), rgba(255,165,0,0.04)); border: 1px solid rgba(255,165,0,0.18); border-radius: 14px; padding: 16px; backdrop-filter: blur(6px); }
+      label { display: block; font-size: 13px; color: var(--muted); margin: 10px 0 6px; }
+      input, select, textarea { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,165,0,0.28); background: rgba(0,0,0,0.25); color: var(--text); outline: none; }
+      textarea { min-height: 130px; resize: vertical; }
+      .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .actions { display: flex; gap: 10px; margin-top: 12px; }
+      button { cursor: pointer; border: none; border-radius: 10px; padding: 10px 14px; font-weight: 600; color: #3a220b; background: linear-gradient(135deg, var(--accent), var(--accent2)); }
+      button.sec { background: rgba(255,165,0,0.15); color: var(--text); }
+      .output { white-space: pre-wrap; }
+      .subject { font-weight: 600; margin-bottom: 10px; }
+      .tiny { font-size: 12px; color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Late Email Agent</h1>
+      <div class="subtitle">Generate a thoughtful, professional explanation for being late to class, a project, or a conference.</div>
+      <div class="grid">
+        <div class="panel">
+          <form id="form">
+            <label>Sender name</label>
+            <input id="personName" placeholder="Alex Johnson" required />
+
+            <label>Recipient name</label>
+            <input id="recipientName" placeholder="Professor Smith" required />
+
+            <div class="row">
+              <div>
+                <label>Audience</label>
+                <select id="audience">
+                  <option value="instructor">Instructor</option>
+                  <option value="professor">Professor</option>
+                  <option value="manager">Manager</option>
+                  <option value="organizer">Organizer</option>
+                </select>
+              </div>
+              <div>
+                <label>Context</label>
+                <select id="context">
+                  <option value="class">Class</option>
+                  <option value="project submission">Project submission</option>
+                  <option value="conference">Conference</option>
+                </select>
+              </div>
+            </div>
+
+            <label>Reason</label>
+            <input id="reason" placeholder="Transportation delay" />
+
+            <div class="row">
+              <div>
+                <label>Date or deadline</label>
+                <input id="dateOrDeadline" placeholder="2025-09-24" />
+              </div>
+              <div>
+                <label>Proposed new deadline (optional)</label>
+                <input id="proposedNewDeadline" placeholder="2025-09-27" />
+              </div>
+            </div>
+
+            <div class="row">
+              <div>
+                <label>Tone</label>
+                <select id="tone">
+                  <option value="professional and apologetic">Professional & apologetic</option>
+                  <option value="concise and direct">Concise & direct</option>
+                  <option value="warm and empathetic">Warm & empathetic</option>
+                </select>
+              </div>
+              <div>
+                <label>Length</label>
+                <select id="length">
+                  <option value="short">Short</option>
+                  <option value="medium">Medium</option>
+                  <option value="long">Long</option>
+                </select>
+              </div>
+            </div>
+
+            <label>Additional details</label>
+            <textarea id="additionalDetails" placeholder="Any relevant context that helps explain and plan to avoid recurrence."></textarea>
+
+            <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+              <input type="checkbox" id="askForExtension" />
+              <label for="askForExtension" style="margin:0;">Ask for extension</label>
+            </div>
+
+            <label>From (sender email)</label>
+            <input id="fromEmail" placeholder="no-reply@yourdomain.com" />
+
+            <label>From (sender name)</label>
+            <input id="fromName" placeholder="Late Email Agent" />
+
+            <label>To (recipient email)</label>
+            <input id="toEmail" placeholder="prof.smith@university.edu" />
+
+            <div class="actions">
+              <button type="submit">Generate</button>
+              <button type="button" class="sec" id="copy">Copy</button>
+              <button type="button" class="sec" id="send">Send</button>
+            </div>
+            <div class="tiny">Backend URL: <span id="backendUrl"></span></div>
+          </form>
+        </div>
+        <div class="panel">
+          <div class="subject" id="subject">Subject will appear here</div>
+          <div class="output" id="body">Email body will appear here</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const backend = localStorage.getItem('late_backend_url') || 'http://localhost:3001';
+      document.getElementById('backendUrl').textContent = backend;
+
+      const form = document.getElementById('form');
+      const subjectEl = document.getElementById('subject');
+      const bodyEl = document.getElementById('body');
+      const copyBtn = document.getElementById('copy');
+      const sendBtn = document.getElementById('send');
+
+      copyBtn.addEventListener('click', async () => {
+        const text = `Subject: ${subjectEl.textContent}\n\n${bodyEl.textContent}`;
+        try { await navigator.clipboard.writeText(text); copyBtn.textContent = 'Copied!'; setTimeout(()=>copyBtn.textContent='Copy', 1200); } catch {}
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const payload = {
+          personName: document.getElementById('personName').value.trim(),
+          recipientName: document.getElementById('recipientName').value.trim(),
+          audience: document.getElementById('audience').value,
+          context: document.getElementById('context').value,
+          reason: document.getElementById('reason').value.trim() || 'unexpected circumstances',
+          dateOrDeadline: document.getElementById('dateOrDeadline').value.trim() || undefined,
+          tone: document.getElementById('tone').value,
+          additionalDetails: document.getElementById('additionalDetails').value.trim() || undefined,
+          askForExtension: document.getElementById('askForExtension').checked,
+          proposedNewDeadline: document.getElementById('proposedNewDeadline').value.trim() || undefined,
+          locale: 'en',
+          length: document.getElementById('length').value,
+        };
+
+        subjectEl.textContent = 'Generating...';
+        bodyEl.textContent = '';
+        try {
+          const res = await fetch(`${backend}/generate`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+          if (!res.ok) throw new Error('Request failed');
+          const data = await res.json();
+          subjectEl.textContent = data.subject || 'No subject';
+          bodyEl.textContent = data.body || 'No body';
+        } catch (err) {
+          subjectEl.textContent = 'Error';
+          bodyEl.textContent = 'Failed to generate. Check backend URL and server logs.';
+        }
+      });
+
+      sendBtn.addEventListener('click', async () => {
+        const subject = subjectEl.textContent.trim();
+        const body = bodyEl.textContent.trim();
+        const fromEmail = document.getElementById('fromEmail').value.trim();
+        const fromName = document.getElementById('fromName').value.trim() || 'Late Email Agent';
+        const toEmail = document.getElementById('toEmail').value.trim();
+        if (!subject || !body) { alert('Generate the email first.'); return; }
+        if (!fromEmail || !toEmail) { alert('Please provide From and To emails.'); return; }
+        sendBtn.textContent = 'Sending...'; sendBtn.disabled = true;
+        try {
+          const res = await fetch(`${backend}/send`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fromEmail, fromName, toEmail, subject, bodyText: body }) });
+          if (!res.ok) throw new Error('Send failed');
+          alert('Sent!');
+        } catch (e) {
+          alert('Failed to send. Check backend logs and MailerSend API key.');
+        } finally {
+          sendBtn.textContent = 'Send'; sendBtn.disabled = false;
+        }
+      });
+    </script>
+  </body>
+  </html>

@@ -1,0 +1,13 @@
+# Tested on Python 3.11
+# Create a 3.11 venv to use these exact pins
+#   python3.11 -m venv .venv && source .venv/bin/activate
+#   pip install -r requirements-fastai.txt
+
+# Pull in core backend deps
+-r requirements.txt
+
+# fastai stack (compatible with torch<2.4)
+fastai==2.7.15
+# Torch 2.3 is the latest allowed by fastai<2.4 constraint
+torch==2.3.1
+torchvision==0.18.1

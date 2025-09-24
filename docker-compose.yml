@@ -1,0 +1,25 @@
+version: "3.9"
+services:
+  backend:
+    build: ./backend
+    container_name: late_email_backend
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
+      - MAILERSEND_API_KEY=${MAILERSEND_API_KEY}
+      - PORT=3001
+      - CORS_ORIGIN=http://localhost:3000
+    ports:
+      - "3001:3001"
+
+  frontend:
+    image: python:3.13-slim
+    container_name: late_email_frontend
+    working_dir: /site
+    volumes:
+      - ./frontend:/site:ro
+    command: python -m http.server 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend

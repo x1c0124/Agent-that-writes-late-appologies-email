@@ -1,0 +1,6 @@
+[tool.pyright]
+venvPath = "backend"
+venv = ".venv"
+reportMissingImports = true
+reportMissingModuleSource = false
+pythonVersion = "3.13"
