@@ -3,5 +3,8 @@
 	"python.terminal.activateEnvironment": true,
 	"python.analysis.diagnosticSeverityOverrides": {
 		"reportMissingImports": "warning"
+	},
+	"cursorpyright.analysis.diagnosticSeverityOverrides": {
+		"reportMissingImports": "warning"
 	}
 }
