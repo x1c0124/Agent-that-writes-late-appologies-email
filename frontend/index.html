@@ -129,7 +129,7 @@
     <script>
       // Smart API detection - automatically switches between local and production
       const API_BASE = (location.hostname.endsWith('vercel.app'))
-        ? 'https://late-agent.onrender.com'      // Production Render
+        ? '/api'                                 // Vercel serverless functions
         : 'http://localhost:3001';               // Local development
       
       const backend = localStorage.getItem('late_backend_url') || API_BASE;
