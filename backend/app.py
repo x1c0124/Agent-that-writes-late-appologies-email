@@ -23,27 +23,26 @@ class GenerateRequest(BaseModel):
     locale: str = "en"
     length: str = "short"  # short | medium | long
 
+class SendEmailRequest(BaseModel):
+    fromEmail: str
+    fromName: str
+    toEmail: str
+    toName: Optional[str] = None
+    subject: str
+    bodyText: Optional[str] = None
+    bodyHtml: Optional[str] = None
 
-app = FastAPI()
-
-origins = os.getenv(
-    "CORS_ORIGIN",
-    "http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173,http://localhost:8080,http://127.0.0.1:8080",
-).split(",")
+app = FastAPI(title="Agent Backend")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[o.strip() for o in origins if o.strip()],
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=["*"], allow_credentials=True,
+    allow_methods=["*"], allow_headers=["*"],
 )
-
 
 @app.get("/health")
 def health():
     return {"ok": True}
-
 
 def _template_response(req: GenerateRequest):
     subject = f"Apologies for being late ({req.context})"
@@ -71,7 +70,6 @@ def _template_response(req: GenerateRequest):
     ]
     body = "\n".join([p for p in parts if p])
     return {"subject": subject, "body": body, "model": "template", "usedLLM": False}
-
 
 @app.post("/generate")
 def generate(req: GenerateRequest):
@@ -139,17 +137,6 @@ def generate(req: GenerateRequest):
 
     return {"subject": data["subject"], "body": data["body"], "model": model, "usedLLM": True}
 
-
-class SendEmailRequest(BaseModel):
-    fromEmail: str
-    fromName: str
-    toEmail: str
-    toName: Optional[str] = None
-    subject: str
-    bodyText: Optional[str] = None
-    bodyHtml: Optional[str] = None
-
-
 @app.post("/send")
 def send_email(req: SendEmailRequest):
     api_key = os.getenv("MAILERSEND_API_KEY")
@@ -199,7 +186,6 @@ def send_email(req: SendEmailRequest):
         if r.status_code >= 300:
             raise HTTPException(status_code=502, detail=f"MailerSend send failed: {r.status_code} {r.text}")
         return {"ok": True}
-
 
 if __name__ == "__main__":  # pragma: no cover
     import uvicorn
