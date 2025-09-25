@@ -32,7 +32,7 @@ class SendEmailRequest(BaseModel):
     bodyText: Optional[str] = None
     bodyHtml: Optional[str] = None
 
-app = FastAPI(title="Agent Backend")
+app = FastAPI(title="Agent Backend", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -40,7 +40,11 @@ app.add_middleware(
     allow_methods=["*"], allow_headers=["*"],
 )
 
-@app.get("/health")
+@app.get("/", tags=["health"])
+def root():
+    return {"status": "ok", "message": "backend is running"}
+
+@app.get("/health", tags=["health"])
 def health():
     return {"ok": True}
 

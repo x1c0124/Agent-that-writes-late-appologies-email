@@ -40,7 +40,11 @@ app.add_middleware(
     allow_methods=["*"], allow_headers=["*"],
 )
 
-@app.get("/health")
+@app.get("/", tags=["health"])
+def root():
+    return {"status": "ok", "message": "backend is running"}
+
+@app.get("/health", tags=["health"])
 def health():
     return {"ok": True}
 
