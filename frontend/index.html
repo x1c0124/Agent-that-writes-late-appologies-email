@@ -127,8 +127,23 @@
     </div>
 
     <script>
-      const backend = localStorage.getItem('late_backend_url') || 'http://localhost:3001';
+      // Smart API detection - automatically switches between local and production
+      const API_BASE = (location.hostname.endsWith('vercel.app'))
+        ? 'https://late-agent.onrender.com'      // Production Render
+        : 'http://localhost:3001';               // Local development
+      
+      const backend = localStorage.getItem('late_backend_url') || API_BASE;
       document.getElementById('backendUrl').textContent = backend;
+
+      // Helper function for API calls
+      async function generate(data) {
+        const res = await fetch(`${API_BASE}/generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        return res.json();
+      }
 
       const form = document.getElementById('form');
       const subjectEl = document.getElementById('subject');
@@ -161,9 +176,7 @@
         subjectEl.textContent = 'Generating...';
         bodyEl.textContent = '';
         try {
-          const res = await fetch(`${backend}/generate`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-          if (!res.ok) throw new Error('Request failed');
-          const data = await res.json();
+          const data = await generate(payload);
           subjectEl.textContent = data.subject || 'No subject';
           bodyEl.textContent = data.body || 'No body';
         } catch (err) {
@@ -182,7 +195,7 @@
         if (!fromEmail || !toEmail) { alert('Please provide From and To emails.'); return; }
         sendBtn.textContent = 'Sending...'; sendBtn.disabled = true;
         try {
-          const res = await fetch(`${backend}/send`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fromEmail, fromName, toEmail, subject, bodyText: body }) });
+          const res = await fetch(`${API_BASE}/send`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fromEmail, fromName, toEmail, subject, bodyText: body }) });
           if (!res.ok) throw new Error('Send failed');
           alert('Sent!');
         } catch (e) {
